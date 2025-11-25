@@ -1,10 +1,105 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سایت علی</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سایت فونت من</title>
+    <!-- Tailwind CSS (برای استایل دهی) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- فونت وزیرمتن (Vazirmatn) -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* استایل اختصاصی برای حالت دست‌نویس */
+        .sketch-box {
+            border: 3px solid #1f2937; /* gray-800 */
+            border-radius: 2px;
+            /* انحنای نامنظم */
+            border-top-left-radius: 255px 15px;
+            border-top-right-radius: 15px 225px;
+            border-bottom-right-radius: 225px 15px;
+            border-bottom-left-radius: 15px 255px;
+            box-shadow: 4px 4px 0px 0px #1f2937; /* سایه سخت */
+            transition: all 0.2s ease;
+        }
+        .sketch-box:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px 0px #1f2937;
+        }
+        
+        /* الگوی پس‌زمینه برای هدر (جایگزین عکس) */
+        .header-pattern {
+            background-color: #e5e7eb;
+            opacity: 1;
+            background-image:  linear-gradient(135deg, #d1d5db 25%, transparent 25%), linear-gradient(225deg, #d1d5db 25%, transparent 25%), linear-gradient(45deg, #d1d5db 25%, transparent 25%), linear-gradient(315deg, #d1d5db 25%, #e5e7eb 25%);
+            background-position:  10px 0, 10px 0, 0 0, 0 0;
+            background-size: 20px 20px;
+            background-repeat: repeat;
+        }
+    </style>
 </head>
-<body style="font-family: sans-serif; direction: rtl; text-align: center; margin-top: 100px;">
-    <h1>سلام، سایت من آماده شد!</h1>
+<body class="min-h-screen flex items-center justify-center py-4 px-4 bg-gray-100">
+
+    <!-- کانتینر اصلی موبایل -->
+    <div class="w-full max-w-sm bg-white min-h-[700px] relative border-4 border-gray-800 rounded-3xl overflow-hidden flex flex-col shadow-xl">
+        
+        <!-- بخش هدر (جایگزین عکس) -->
+        <div class="w-full h-48 header-pattern flex items-center justify-center border-b-4 border-gray-800 relative">
+            <div class="bg-white px-8 py-3 sketch-box rotate-[-3deg] z-10">
+                <h1 class="text-4xl font-black text-gray-800 tracking-tighter">عکـــس</h1>
+            </div>
+        </div>
+
+        <!-- محتوا -->
+        <div class="flex-1 px-5 py-8 flex flex-col gap-5 w-full">
+
+            <!-- دکمه دانلود فونت‌ها -->
+            <button class="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-yellow-50 sketch-box group">
+                <span class="text-lg font-bold text-gray-800">دانلود فونت‌هـا</span>
+                <!-- آیکون دانلود -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800 group-hover:scale-110 transition-transform"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            </button>
+
+            <!-- دکمه خرید فونت (لینک شده به فونت ایران) -->
+            <a href="https://fontiran.com" target="_blank" class="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-green-50 sketch-box group cursor-pointer no-underline">
+                <span class="text-lg font-bold text-gray-800">خـرید فـونت</span>
+                <!-- آیکون سبد خرید -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800 group-hover:scale-110 transition-transform"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            </a>
+
+            <div class="h-2"></div><!-- دکمه ارتباط با ما -->
+            <button class="w-full px-5 py-4 bg-blue-50 hover:bg-blue-100 sketch-box flex justify-center items-center gap-2">
+                <!-- آیکون ایمیل -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <span class="text-xl font-black text-gray-800">ارتباط با ما</span>
+            </button>
+
+            <!-- دکمه حمایت -->
+            <button class="w-full px-5 py-5 bg-red-50 hover:bg-red-100 sketch-box flex justify-center items-center gap-2 rotate-1">
+                <!-- آیکون قلب -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-pulse"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                <span class="text-2xl font-black text-gray-800">حمــایت</span>
+            </button>
+
+        </div>
+
+        <!-- خط‌خطی‌های پایین صفحه -->
+        <div class="mt-auto h-24 w-full relative overflow-hidden text-gray-800">
+             <!-- SVG Wave hand-drawn style -->
+             <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+                <path d="M0.00,49.98 C150.00,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: transparent;"></path>
+                <!-- Scribble lines -->
+                <path d="M10,80 Q100,150 200,80 T400,80" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+                <path d="M30,110 Q120,180 220,110 T420,110" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.7" />
+                <path d="M-20,130 Q80,190 180,130 T380,130" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.5" />
+             </svg>
+        </div>
+
+    </div>
+
 </body>
 </html>
