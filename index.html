@@ -3,89 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سایت فونت من</title>
-    <!-- Tailwind CSS (برای استایل دهی) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- فونت وزیرمتن (Vazirmatn) -->
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <title>فونت فروشی | Font Shop</title>
     
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Vazirmatn Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: #f3f4f6;
+            background-image: radial-gradient(at 0% 0%, hsla(39,100%,74%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(28,100%,74%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(43,100%,56%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
         }
-        /* استایل اختصاصی برای حالت دست‌نویس */
-        .sketch-box {
-            border: 3px solid #1f2937; /* gray-800 */
-            border-radius: 2px;
-            /* انحنای نامنظم */
-            border-top-left-radius: 255px 15px;
-            border-top-right-radius: 15px 225px;
-            border-bottom-right-radius: 225px 15px;
-            border-bottom-left-radius: 15px 255px;
-            box-shadow: 4px 4px 0px 0px #1f2937; /* سایه سخت */
-            transition: all 0.2s ease;
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
-        .sketch-box:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px 0px #1f2937;
+
+        /* Animation for buttons */
+        .btn-anim {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        /* الگوی پس‌زمینه برای هدر (جایگزین عکس) */
-        .header-pattern {
-            background-color: #e5e7eb;
-            opacity: 1;
-            background-image:  linear-gradient(135deg, #d1d5db 25%, transparent 25%), linear-gradient(225deg, #d1d5db 25%, transparent 25%), linear-gradient(45deg, #d1d5db 25%, transparent 25%), linear-gradient(315deg, #d1d5db 25%, #e5e7eb 25%);
-            background-position:  10px 0, 10px 0, 0 0, 0 0;
-            background-size: 20px 20px;
-            background-repeat: repeat;
+        .btn-anim:active {
+            transform: scale(0.95);
+        }
+        .btn-anim:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Toast Notification Animation */
+        @keyframes slideUpFade {
+            0% { transform: translate(-50%, 100%); opacity: 0; }
+            100% { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .toast-enter {
+            animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .toast-exit {
+            animation: fadeOut 0.3s forwards;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-4 px-4 bg-gray-100">
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-orange-200 selection:text-orange-900">
 
-    <!-- کانتینر اصلی موبایل -->
-    <div class="w-full max-w-sm bg-white min-h-[700px] relative border-4 border-gray-800 rounded-3xl overflow-hidden flex flex-col shadow-xl">
+    <!-- Main Container (Mobile styled card) -->
+    <div class="glass-card w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden relative flex flex-col min-h-[600px] border-t-4 border-orange-400">
         
-        <!-- بخش هدر (جایگزین عکس) -->
-        <div class="w-full h-48 header-pattern flex items-center justify-center border-b-4 border-gray-800 relative">
-            <div class="bg-white px-8 py-3 sketch-box rotate-[-3deg] z-10">
-                <h1 class="text-4xl font-black text-gray-800 tracking-tighter">دانلود فونت های علی بابایی</h1>
+        <!-- Header Section -->
+        <header class="pt-10 pb-6 px-8 text-center bg-gradient-to-b from-white/50 to-transparent">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-100 text-orange-600 mb-4 shadow-inner">
+                <i data-lucide="type" class="w-8 h-8"></i>
             </div>
-        </div>
+            <h1 class="text-3xl font-black text-gray-800 tracking-tight drop-shadow-sm">فونت فروشی</h1>
+            <p class="text-gray-500 text-sm mt-2 font-medium">مرجع تخصصی فونت‌های فارسی</p>
+        </header>
 
-        <!-- محتوا -->
-        <div class="flex-1 px-5 py-8 flex flex-col gap-5 w-full">
-
-            <!-- دکمه دانلود فونت‌ها -->
-            <button class="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-yellow-50 sketch-box group">
-                <span class="text-lg font-bold text-gray-800">دانلود فونت‌هـا</span>
-                <!-- آیکون دانلود -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800 group-hover:scale-110 transition-transform"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <!-- Buttons Container -->
+        <main class="flex-1 px-6 flex flex-col gap-4 py-2">
+            
+            <!-- Search Button -->
+            <button onclick="handleAction('search')" class="btn-anim group relative w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <span class="flex items-center gap-3">
+                    <span class="bg-blue-100 text-blue-600 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </span>
+                    <span class="text-lg">فونت سیرچ</span>
+                </span>
+                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-orange-400 transition-colors"></i>
             </button>
 
-                <!-- آیکون سبد خرید -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800 group-hover:scale-110 transition-transform"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <!-- Coming Soon 1 -->
+            <button onclick="handleAction('soon')" class="btn-anim group w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <span class="flex items-center gap-3">
+                    <span class="bg-amber-100 text-amber-600 p-2 rounded-lg group-hover:bg-amber-200 transition-colors">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                    </span>
+                    <span class="text-lg">فونت به زودی</span>
+                </span>
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">منتظر باشید</span>
+            </button>
+
+             <!-- Coming Soon 2 -->
+             <button onclick="handleAction('soon')" class="btn-anim group w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <span class="flex items-center gap-3">
+                    <span class="bg-purple-100 text-purple-600 p-2 rounded-lg group-hover:bg-purple-200 transition-colors">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </span>
+                    <span class="text-lg">فونت به زودی</span>
+                </span>
+                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-orange-400 transition-colors"></i>
+            </button>
+
+            <!-- Support Button -->
+            <button onclick="handleAction('support')" class="btn-anim group w-full bg-gradient-to-r from-emerald-50 to-white hover:from-emerald-100 hover:to-white text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between">
+                <span class="flex items-center gap-3">
+                    <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                    </span>
+                    <span class="text-lg">حمایت مالی</span>
+                </span>
+                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-emerald-400 transition-colors"></i>
+            </button>
+
+            <!-- Contact Button -->
+            <a href="https://ble.ir/@alibabaei_313" target="_blank" class="btn-anim group w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-gray-300 flex items-center justify-between mt-2">
+                <span class="flex items-center gap-3">
+                    <span class="bg-gray-700 text-white p-2 rounded-lg">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    </span>
+                    <span class="text-lg">ارتباط با ما</span>
+                </span>
+                <i data-lucide="external-link" class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors"></i>
             </a>
 
-            <div class="h-2"></div><!-- دکمه ارتباط با ما -->
-            <button class="w-full px-5 py-4 bg-blue-50 hover:bg-blue-100 sketch-box flex justify-center items-center gap-2">
-                <!-- آیکون ایمیل -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                <span class="text-xl font-black text-gray-800">ارتباط با ما</span>
-            </button>
+        </main>
 
-            <!-- دکمه حمایت -->
-            <button class="w-full px-5 py-5 bg-red-50 hover:bg-red-100 sketch-box flex justify-center items-center gap-2 rotate-1">
-                <!-- آیکون قلب -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-pulse"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                <span class="text-2xl font-black text-gray-800">حمــایت</span>
-            </button>
+        <!-- Footer -->
+        <footer class="py-6 text-center text-gray-400 text-sm border-t border-gray-100/50 mt-4 bg-gray-50/50">
+            <p>این سایت آزمایشی است</p>
+            <p class="text-xs mt-1 text-gray-300 font-light">نسخه ۱.۰.۰</p>
+        </footer>
 
-        </div>
-
-       
+        <!-- Decorative Blobs (Background aesthetics inside card) -->
+        <div class="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-orange-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 pointer-events-none"></div>
     </div>
 
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 hidden z-50 min-w-[300px]">
+        <div id="toast-icon" class="text-orange-400">
+            <!-- Icon injected by JS -->
+        </div>
+        <div>
+            <h4 id="toast-title" class="font-bold text-sm text-gray-200">پیام سیستم</h4>
+            <p id="toast-message" class="text-sm font-medium">متن پیام</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // UI Logic
+        function handleAction(action) {
+            if (action === 'search' || action === 'soon') {
+                showToast('هنوز ساخته نشده منتظر باش', 'alert-circle', 'text-amber-400');
+            } else if (action === 'support') {
+                showToast('هنوز ساخته نشده', 'wallet', 'text-emerald-400');
+            }
+        }
+
+        let toastTimeout;
+
+        function showToast(message, iconName = 'info', colorClass = 'text-blue-400') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            // Set content
+            msgEl.textContent = message;
+            
+            // Set Icon
+            iconEl.className = colorClass;
+            iconEl.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+            lucide.createIcons(); // Refresh icon
+
+            // Reset Animation
+            toast.classList.remove('hidden', 'toast-exit');
+            toast.classList.add('toast-enter', 'flex');
+
+            // Clear existing timeout if user clicks rapidly
+            if (toastTimeout) clearTimeout(toastTimeout);
+
+            // Hide after 3 seconds
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('flex');
+                }, 300); // Wait for exit animation
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
