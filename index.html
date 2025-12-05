@@ -1,220 +1,366 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سایت آزمایشی | Font Shop</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+import React, { useState, useRef, useEffect } from 'react';
+import { Download, Eraser, PaintBucket, Pencil, Trash2, Grid, Pipette, Undo, Redo, Palette, Monitor } from 'lucide-react';
 
-    <!-- Vazirmatn Font -->
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+export default function AliKufiApp() {
+  // --- Refs (For Performance) ---
+  // استفاده از Ref برای داده‌های پیکسلی باعث می‌شود سرعت رسم بسیار بالا برود و لگ نداشته باشد
+  const pixelsRef = useRef({}); 
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
 
-    <style>
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #f3f4f6;
-            background-image: radial-gradient(at 0% 0%, hsla(39,100%,74%,1) 0, transparent 50%), 
-                              radial-gradient(at 50% 0%, hsla(28,100%,74%,1) 0, transparent 50%), 
-                              radial-gradient(at 100% 0%, hsla(43,100%,56%,1) 0, transparent 50%);
-            background-attachment: fixed;
-            background-size: cover;
-        }
+  // --- State (For UI) ---
+  const [gridSize, setGridSize] = useState(32); // 16, 32, 64
+  const [selectedColor, setSelectedColor] = useState('#3b82f6');
+  const [tool, setTool] = useState('pencil'); // pencil, eraser, bucket, picker
+  const [showGrid, setShowGrid] = useState(true);
+  const [history, setHistory] = useState([{}]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [updateTrigger, setUpdateTrigger] = useState(0); // Forcing re-renders when needed
 
-        /* Glassmorphism Effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
+  // Palettes
+  const palettes = [
+    ['#1a1c2c', '#5d275d', '#b13e53', '#ef7d57', '#ffcd75', '#a7f070', '#38b764', '#257179', '#29366f', '#3b5dc9', '#41a6f6', '#73eff7', '#f4f4f4', '#94b0c2', '#566c86', '#333c57'],
+    ['#000000', '#9D9D9D', '#FFFFFF', '#BE2633', '#E06F8B', '#493C2B', '#A46422', '#EB8931', '#F7E26B', '#2F484E', '#44891A', '#A3CE27', '#1B2632', '#005784', '#31A2F2', '#B2DCEF']
+  ];
 
-        /* Animation for buttons */
-        .btn-anim {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-anim:active {
-            transform: scale(0.95);
-        }
-        .btn-anim:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
+  // --- Core Functions ---
 
-        /* Toast Notification Animation */
-        @keyframes slideUpFade {
-            0% { transform: translate(-50%, 100%); opacity: 0; }
-            100% { transform: translate(-50%, 0); opacity: 1; }
-        }
-        .toast-enter {
-            animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .toast-exit {
-            animation: fadeOut 0.3s forwards;
-        }
+  // Redraw the entire canvas from pixelsRef
+  const redrawCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const pixelSize = canvas.width / gridSize;
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4 selection:bg-orange-200 selection:text-orange-900">
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    <!-- Main Container (Mobile styled card) -->
-    <div class="glass-card w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden relative flex flex-col min-h-[600px] border-t-4 border-orange-400">
-        
-        <!-- Header Section -->
-        <header class="pt-10 pb-6 px-8 text-center bg-gradient-to-b from-white/50 to-transparent">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-100 text-orange-600 mb-4 shadow-inner">
-                <i data-lucide="type" class="w-8 h-8"></i>
+    // Draw Pixels
+    const currentPixels = pixelsRef.current;
+    Object.keys(currentPixels).forEach(key => {
+      const [x, y] = key.split(',').map(Number);
+      ctx.fillStyle = currentPixels[key];
+      ctx.fillRect(x  pixelSize, y  pixelSize, pixelSize, pixelSize);
+    });
+
+    // Draw Grid
+    if (showGrid) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      for (let i = 0; i <= gridSize; i++) {
+        ctx.moveTo(i  pixelSize, 0);
+        ctx.lineTo(i  pixelSize, canvas.height);
+        ctx.moveTo(0, i  pixelSize);
+        ctx.lineTo(canvas.width, i  pixelSize);
+      }
+      ctx.stroke();
+    }
+  };
+
+  // Draw a single pixel immediately (optimization)
+  const drawSinglePixel = (x, y, color) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const pixelSize = canvas.width / gridSize;
+
+    if (color === null) {
+        // Eraser logic is tricky in single draw, easier to just clear rect and redraw grid if needed
+        // But for speed, we can clear the rect. The grid might be lost in that cell until next redraw, which is fine.
+        ctx.clearRect(x  pixelSize, y  pixelSize, pixelSize, pixelSize);
+    } else {
+        ctx.fillStyle = color;
+        ctx.fillRect(x  pixelSize, y  pixelSize, pixelSize, pixelSize);
+    }
+
+    // Re-draw grid lines for this cell if grid is on
+    if (showGrid) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x  pixelSize, y  pixelSize, pixelSize, pixelSize);
+    }
+  };
+
+  // Update effect
+  useEffect(() => {
+    redrawCanvas();
+  }, [gridSize, showGrid, updateTrigger]); // Re-run when these change
+
+  // --- History Management ---
+  const saveHistory = () => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    // Deep copy current pixels
+    newHistory.push({ ...pixelsRef.current });
+    if (newHistory.length > 30) newHistory.shift();
+
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      pixelsRef.current = { ...history[newIndex] };
+      redrawCanvas();
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+
+const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      pixelsRef.current = { ...history[newIndex] };
+      redrawCanvas();
+    }
+  };
+
+  // --- Interaction Logic ---
+  const getCoords = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    let cx, cy;
+    if (e.touches && e.touches.length > 0) {
+      cx = e.touches[0].clientX;
+      cy = e.touches[0].clientY;
+    } else {
+      cx = e.clientX;
+      cy = e.clientY;
+    }
+
+    const x = Math.floor((cx - rect.left)  scaleX / (canvas.width / gridSize));
+    const y = Math.floor((cy - rect.top)  scaleY / (canvas.height / gridSize));
+    return { x, y };
+  };
+
+  const applyTool = (x, y) => {
+    if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+    const key = `${x},${y}`;
+
+    if (tool === 'pencil') {
+      if (pixelsRef.current[key] !== selectedColor) {
+        pixelsRef.current[key] = selectedColor;
+        drawSinglePixel(x, y, selectedColor);
+      }
+    } else if (tool === 'eraser') {
+      if (pixelsRef.current[key]) {
+        delete pixelsRef.current[key];
+        drawSinglePixel(x, y, null);
+      }
+    } else if (tool === 'picker') {
+      const color = pixelsRef.current[key];
+      if (color) {
+        setSelectedColor(color);
+        setTool('pencil');
+      }
+    }
+  };
+
+  const floodFill = (startX, startY) => {
+    const key = `${startX},${startY}`;
+    const targetColor = pixelsRef.current[key];
+    if (targetColor === selectedColor) return;
+
+    const queue = [[startX, startY]];
+    const visited = new Set();
+    const newPixels = { ...pixelsRef.current };
+
+    while (queue.length > 0) {
+        const [x, y] = queue.pop();
+        const k = `${x},${y}`;
+
+        if (visited.has(k)) continue;
+        if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) continue;
+
+        if (newPixels[k] === targetColor) {
+            newPixels[k] = selectedColor;
+            visited.add(k);
+            queue.push([x+1, y], [x-1, y], [x, y+1], [x, y-1]);
+        }
+    }
+
+    pixelsRef.current = newPixels;
+    redrawCanvas();
+    saveHistory();
+  };
+
+  const handleStart = (e) => {
+    const { x, y } = getCoords(e);
+    if (tool === 'bucket') {
+      floodFill(x, y);
+    } else {
+      setIsDrawing(true);
+      applyTool(x, y);
+    }
+  };
+
+  const handleMove = (e) => {
+    if (!isDrawing) return;
+    if (tool === 'bucket') return;
+    const { x, y } = getCoords(e);
+    applyTool(x, y);
+  };
+
+  const handleEnd = () => {
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveHistory();
+    }
+  };
+
+  // --- Export & Reset ---
+  const handleExport = () => {
+    const canvas = document.createElement('canvas');
+    const scale = 32; // Super HD
+    canvas.width = gridSize  scale;
+    canvas.height = gridSize  scale;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    Object.keys(pixelsRef.current).forEach(key => {
+      const [x, y] = key.split(',').map(Number);
+      ctx.fillStyle = pixelsRef.current[key];
+      ctx.fillRect(x  scale, y  scale, scale, scale);
+    });
+
+    const link = document.createElement('a');
+    link.download = `ali-kufi-export-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  const clearAll = () => {
+    if (window.confirm('همه چیز پاک شود؟')) {
+      pixelsRef.current = {};
+      redrawCanvas();
+      saveHistory();
+    }
+  };
+
+  return (
+    <div dir="rtl" className="flex flex-col h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden select-none">
+       {/* Top Bar */}
+      <div className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-20 shadow-md">
+        <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-md flex items-center justify-center font-bold">ع</div>
+            <span className="font-bold hidden sm:
+
+block">علی کوفی</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+             <button onClick={() => setGridSize(prev => prev === 16 ? 32 : prev === 32 ? 64 : 16)} className="flex items-center gap-2 px-3 py-1.5 text-xs bg-slate-800 rounded hover:bg-slate-700 transition-colors border border-slate-700">
+                <Monitor size={14} />
+                <span>{gridSize}×{gridSize}</span>
+             </button>
+             <div className="h-6 w-px bg-slate-700 mx-1"></div>
+             <button onClick={undo} disabled={historyIndex === 0} className="p-2 text-slate-400 hover:text-white disabled:opacity-30"><Undo size={18}/></button>
+             <button onClick={redo} disabled={historyIndex === history.length-1} className="p-2 text-slate-400 hover:text-white disabled:opacity-30"><Redo size={18}/></button>
+        </div>
+
+        <button onClick={handleExport} className="bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 shadow-lg shadow-green-900/50">
+            <Download size={14} />
+            <span>خروجی</span>
+        </button>
+      </div>
+
+      <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
+
+        {/* Tools Sidebar /}
+        <div className="w-full md:w-16 bg-slate-900 border-l border-slate-800 flex md:flex-col items-center p-2 gap-2 overflow-x-auto md:overflow-visible order-2 md:order-1 shrink-0">
+             {[
+                 { id: 'pencil', icon: Pencil, color: 'text-blue-400' },
+                 { id: 'eraser', icon: Eraser, color: 'text-pink-400' },
+                 { id: 'bucket', icon: PaintBucket, color: 'text-yellow-400' },
+                 { id: 'picker', icon: Pipette, color: 'text-cyan-400' },
+             ].map(t => (
+                 <button 
+                    key={t.id}
+                    onClick={() => setTool(t.id)}
+                    className={`p-3 rounded-xl transition-all ${tool === t.id ? 'bg-slate-800 shadow-inner ring-1 ring-white/20 ' + t.color : 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300'}`}
+                 >
+                     <t.icon size={22} />
+                 </button>
+             ))}
+
+             <div className="w-px h-8 md:w-8 md:h-px bg-slate-800 mx-2 md:my-2"></div>
+
+             <button onClick={() => setShowGrid(!showGrid)} className={`p-3 rounded-xl transition-all ${showGrid ? 'bg-indigo-900/50 text-indigo-300' : 'text-slate-500'}`}>
+                 <Grid size={22} />
+             </button>
+             <button onClick={clearAll} className="p-3 rounded-xl text-red-500 hover:bg-red-900/20 md:mt-auto">
+                 <Trash2 size={22} />
+             </button>
+        </div>
+
+        {/ Canvas Area /}
+        <div className="flex-grow bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 order-1 md:order-2 touch-none" ref={containerRef}>
+            {/ Background Pattern /}
+            <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+            <div className="relative shadow-2xl shadow-black rounded-sm border border-slate-800 bg-[#1a1a1a]">
+                 <canvas
+                    ref={canvasRef}
+                    width={600}
+                    height={600}
+                    onMouseDown={handleStart}
+                    onMouseMove={handleMove}
+                    onMouseUp={handleEnd}
+                    onMouseLeave={handleEnd}
+                    onTouchStart={handleStart}
+                    onTouchMove={handleMove}
+                    onTouchEnd={handleEnd}
+                    className="block cursor-crosshair touch-none max-w-full max-h-[70vh] md:max-h-[85vh] w-auto h-auto object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                 />
             </div>
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight drop-shadow-sm">سایت آزمایشی</h1>
-            <p class="text-gray-500 text-sm mt-2 font-medium">این یک متن است</p>
-        </header>
-
-        <!-- Buttons Container -->
-        <main class="flex-1 px-6 flex flex-col gap-4 py-2">
-            
-            <!-- Search Button -->
-            <button onclick="handleAction('search')" class="btn-anim group relative w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <span class="flex items-center gap-3">
-                    <span class="bg-blue-100 text-blue-600 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </span>
-                    <span class="text-lg">دکمه اول</span>
-                </span>
-                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-orange-400 transition-colors"></i>
-            </button>
-
-            <!-- Coming Soon 1 -->
-            <button onclick="handleAction('soon')" class="btn-anim group w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <span class="flex items-center gap-3">
-                    <span class="bg-amber-100 text-amber-600 p-2 rounded-lg group-hover:bg-amber-200 transition-colors">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
-                    </span>
-                    <span class="text-lg">دکمه دوم</span>
-                </span>
-                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">متن</span>
-            </button>
-
-             <!-- Coming Soon 2 -->
-             <button onclick="handleAction('soon')" class="btn-anim group w-full bg-white hover:bg-orange-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <span class="flex items-center gap-3">
-                    <span class="bg-purple-100 text-purple-600 p-2 rounded-lg group-hover:bg-purple-200 transition-colors">
-                        <i data-lucide="sparkles" class="w-5 h-5"></i>
-                    </span>
-                    <span class="text-lg">دکمه سوم</span>
-                </span>
-                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-orange-400 transition-colors"></i>
-            </button>
-
-            <!-- Support Button -->
-            <button onclick="handleAction('support')" class="btn-anim group w-full bg-gradient-to-r from-emerald-50 to-white hover:from-emerald-100 hover:to-white text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between">
-                <span class="flex items-center gap-3">
-                    <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg group-hover:bg-emerald-200 transition-colors">
-                        <i data-lucide="heart" class="w-5 h-5"></i>
-                    </span>
-                    <span class="text-lg">دکمه تستی</span>
-                </span>
-                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-300 group-hover:text-emerald-400 transition-colors"></i>
-            </button>
-
-            <!-- Contact Button -->
-            <a href="https://ble.ir/@alibabaei_313" target="_blank" class="btn-anim group w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-gray-300 flex items-center justify-between mt-2">
-                <span class="flex items-center gap-3">
-                    <span class="bg-gray-700 text-white p-2 rounded-lg">
-                        <i data-lucide="message-circle" class="w-5 h-5"></i>
-                    </span>
-                    <span class="text-lg">ارتباط با ما</span>
-                </span>
-                <i data-lucide="external-link" class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors"></i>
-            </a>
-
-        </main>
-
-        <!-- Footer -->
-        <footer class="py-6 text-center text-gray-400 text-sm border-t border-gray-100/50 mt-4 bg-gray-50/50">
-            <p>این سایت آزمایشی است</p>
-            <p class="text-xs mt-1 text-gray-300 font-light">نسخه ۱.۰.۰</p>
-        </footer>
-
-        <!-- Decorative Blobs (Background aesthetics inside card) -->
-        <div class="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-orange-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 pointer-events-none"></div>
-    </div>
-
-    <!-- Custom Toast Notification -->
-    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 hidden z-50 min-w-[300px]">
-        <div id="toast-icon" class="text-orange-400">
-            <!-- Icon injected by JS -->
         </div>
-        <div>
-            <h4 id="toast-title" class="font-bold text-sm text-gray-200">پیام سیستم</h4>
-            <p id="toast-message" class="text-sm font-medium">متن پیام</p>
+
+        {/ Color Palette Sidebar */}
+        <div className="w-full md:w-64 bg-slate-900 border-r border-sl
+
+ate-800 flex flex-col order-3 shrink-0">
+             <div className="p-4 border-b border-slate-800">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-lg shadow-inner ring-1 ring-white/10" style={{ backgroundColor: selectedColor }}></div>
+                    <div className="flex-1">
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 block">رنگ فعلی</label>
+                        <div className="flex bg-slate-800 rounded p-1">
+                            <input type="text" value={selectedColor} readOnly className="bg-transparent w-full text-xs font-mono text-center outline-none text-slate-300"/>
+                            <input type="color" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="w-6 h-4 opacity-0 absolute cursor-pointer"/>
+                            <Palette size={14} className="text-slate-500"/>
+                        </div>
+                    </div>
+                </div>
+             </div>
+
+             <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                {palettes.map((pal, i) => (
+                    <div key={i}>
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2 block">پالت کلاسیک {i+1}</label>
+                        <div className="grid grid-cols-4 gap-2">
+                            {pal.map(c => (
+                                <button
+                                    key={c}
+                                    onClick={() => { setSelectedColor(c); setTool('pencil'); }}
+                                    className={`aspect-square rounded-md transition-transform hover:scale-105 ${selectedColor === c ? 'ring-2 ring-white scale-110 z-10' : ''}`}
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+             </div>
         </div>
+
+      </div>
     </div>
-
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // UI Logic
-        function handleAction(action) {
-            if (action === 'search' || action === 'soon') {
-                showToast('هنوز ساخته نشده منتظر باش', 'alert-circle', 'text-amber-400');
-            } else if (action === 'support') {
-                showToast('هنوز ساخته نشده', 'wallet', 'text-emerald-400');
-            }
-        }
-
-        let toastTimeout;
-
-        function showToast(message, iconName = 'info', colorClass = 'text-blue-400') {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const iconEl = document.getElementById('toast-icon');
-
-            // Set content
-            msgEl.textContent = message;
-            
-            // Set Icon
-            iconEl.className = colorClass;
-            iconEl.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
-            lucide.createIcons(); // Refresh icon
-
-            // Reset Animation
-            toast.classList.remove('hidden', 'toast-exit');
-            toast.classList.add('toast-enter', 'flex');
-
-            // Clear existing timeout if user clicks rapidly
-            if (toastTimeout) clearTimeout(toastTimeout);
-
-            // Hide after 3 seconds
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-exit');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                    toast.classList.remove('flex');
-                }, 300); // Wait for exit animation
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
+  );
+}
