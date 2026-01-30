@@ -1,1 +1,82 @@
- // سلام فعلا اینجا خبری نیست
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وبسایت قطعه</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: #fff;
+            text-align: center;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px 50px;
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: fadeIn 2s ease-out;
+        }
+
+        p {
+            font-size: 20px;
+            margin-top: 20px;
+            animation: fadeIn 3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: #ff416c;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #ff4b2b;
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>سلام، این وبسایت فعلا قطعه</h1>
+    <p>ما در حال ارتقاء وبسایت هستیم و به زودی باز خواهیم گشت.</p>
+    <a href="#" class="button">بازگشت به صفحه اصلی</a>
+</div>
+
+</body>
+</html>
